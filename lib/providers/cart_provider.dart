@@ -1,10 +1,12 @@
+// cart_provider.dart
+
 import 'package:flutter/material.dart';
 
 class CartItem {
   final String productId;
   final String productName;
   final double price;
-  final int quantity;
+  int quantity;
 
   CartItem({
     required this.productId,
@@ -15,7 +17,7 @@ class CartItem {
 }
 
 class CartProvider with ChangeNotifier {
-  List<CartItem> _cartItems = [];
+  final List<CartItem> _cartItems = [];
 
   List<CartItem> get cartItems => _cartItems;
 
@@ -35,11 +37,9 @@ class CartProvider with ChangeNotifier {
     required double price,
     int quantity = 1,
   }) {
-    // Check if the product is already in the cart
     int existingIndex = _cartItems.indexWhere((item) => item.productId == productId);
 
     if (existingIndex != -1) {
-      // If the product is already in the cart, update the quantity
       _cartItems[existingIndex] = CartItem(
         productId: productId,
         productName: productName,
@@ -47,7 +47,6 @@ class CartProvider with ChangeNotifier {
         quantity: _cartItems[existingIndex].quantity + quantity,
       );
     } else {
-      // If the product is not in the cart, add it
       _cartItems.add(CartItem(
         productId: productId,
         productName: productName,
@@ -56,21 +55,25 @@ class CartProvider with ChangeNotifier {
       ));
     }
 
-    // Notify listeners that the cart has been updated
     notifyListeners();
   }
 
   void removeFromCart(String productId) {
     _cartItems.removeWhere((item) => item.productId == productId);
-
-    // Notify listeners that the cart has been updated
     notifyListeners();
+  }
+
+  void updateQuantity(String productId, int newQuantity) {
+    int existingIndex = _cartItems.indexWhere((item) => item.productId == productId);
+
+    if (existingIndex != -1) {
+      _cartItems[existingIndex].quantity = newQuantity;
+      notifyListeners();
+    }
   }
 
   void clearCart() {
     _cartItems.clear();
-
-    // Notify listeners that the cart has been updated
     notifyListeners();
   }
 }

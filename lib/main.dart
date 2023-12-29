@@ -2,14 +2,24 @@ import 'package:edgepos/pages/custom_loading_screen.dart';
 import 'package:edgepos/pages/login_page.dart';
 import 'package:edgepos/pages/error_page.dart'; // Import the ErrorPage
 import 'package:edgepos/pages/main_page.dart';
+import 'package:edgepos/providers/cart_provider.dart';
 import 'package:edgepos/services/login_api.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+     providers: [
+        ChangeNotifierProvider(create: (_) => CartProvider()),
+        // Add other providers if needed
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

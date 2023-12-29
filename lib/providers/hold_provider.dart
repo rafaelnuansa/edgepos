@@ -15,7 +15,7 @@ class HoldItem {
 }
 
 class HoldProvider with ChangeNotifier {
-  List<HoldItem> _heldOrders = [];
+  final List<HoldItem> _heldOrders = [];
 
   List<HoldItem> get heldOrders => _heldOrders;
 

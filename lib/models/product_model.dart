@@ -2,21 +2,21 @@ class Product {
   final int id;
   final String title;
   final String? description;
-  final int categoryId;
-  final int? brandId;
-  final int? unitId;
-  final int? groupId;
-  final int taxable;
+  final String categoryId;
+  final String? brandId;
+  final String? unitId;
+  final String? groupId;
+  final bool taxable;  // Ubah tipe data menjadi bool
   final String taxType;
-  final int? taxId;
+  final String? taxId;
   final String productType;
-  final int? branchId;
+  final String? branchId;
   final String imageURL;
-  final int createdBy;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
+  final String createdBy;
+  final DateTime createdAt;
+  final DateTime updatedAt;
   final String availability;
-  final int availableStock;
+  final String availableStock;  // Ubah tipe data menjadi double
   final List<Variant> variants;
 
   Product({
@@ -34,8 +34,8 @@ class Product {
     this.branchId,
     required this.imageURL,
     required this.createdBy,
-    this.createdAt,
-    this.updatedAt,
+    required this.createdAt,
+    required this.updatedAt,
     required this.availability,
     required this.availableStock,
     required this.variants,
@@ -46,23 +46,19 @@ class Product {
       id: json['id'],
       title: json['title'],
       description: json['description'],
-      categoryId: json['category_id'],
+      categoryId: json['category_id'].toString(),
       brandId: json['brand_id'],
       unitId: json['unit_id'],
       groupId: json['group_id'],
-      taxable: json['taxable'],
+      taxable: json['taxable'] == "1",  // Ubah tipe data menjadi bool
       taxType: json['tax_type'],
       taxId: json['tax_id'],
       productType: json['product_type'],
       branchId: json['branch_id'],
       imageURL: json['imageURL'],
-      createdBy: json['created_by'],
-      createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'])
-          : null,
-      updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'])
-          : null,
+      createdBy: json['created_by'].toString(),
+      createdAt: DateTime.parse(json['created_at']),
+      updatedAt: DateTime.parse(json['updated_at']),
       availability: json['availability'],
       availableStock: json['available_stock'],
       variants: (json['variants'] as List<dynamic>)
@@ -75,17 +71,17 @@ class Product {
 class Variant {
   final int id;
   final String? sku;
-  final int productId;
+  final String productId;
   final String variantTitle;
   final String attributeValues;
   final String? variantDetails;
-  final double purchasePrice;
-  final double sellingPrice;
-  final int enabled;
+  final double purchasePrice;  // Ubah tipe data menjadi double
+  final String sellingPrice;   // Ubah tipe data menjadi String
+  final String enabled;
   final bool? isNotify;
   final String imageURL;
   final String? barCode;
-  final int reOrder;
+  final String reOrder;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -111,12 +107,12 @@ class Variant {
     return Variant(
       id: json['id'],
       sku: json['sku'],
-      productId: json['product_id'],
+      productId: json['product_id'].toString(),
       variantTitle: json['variant_title'],
       attributeValues: json['attribute_values'],
       variantDetails: json['variant_details'],
-      purchasePrice: json['purchase_price'].toDouble(),
-      sellingPrice: json['selling_price'].toDouble(),
+      purchasePrice: double.parse(json['purchase_price']),
+     sellingPrice: json['selling_price'],
       enabled: json['enabled'],
       isNotify: json['isNotify'],
       imageURL: json['imageURL'],

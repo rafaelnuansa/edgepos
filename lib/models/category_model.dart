@@ -1,8 +1,7 @@
-
 class Category {
   final int id;
   final String name;
-  final int createdBy;
+  final String createdBy;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 

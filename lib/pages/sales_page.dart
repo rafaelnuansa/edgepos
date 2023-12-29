@@ -5,6 +5,8 @@ import 'package:edgepos/models/product_model.dart';
 import 'package:edgepos/services/product_api.dart';
 import 'package:edgepos/services/category_api.dart';
 import 'package:edgepos/models/category_model.dart';
+import 'package:provider/provider.dart'; // Import Provider
+import 'package:edgepos/providers/cart_provider.dart'; // Update the path accordingly
 
 class SalesPage extends StatefulWidget {
   const SalesPage({Key? key}) : super(key: key);
@@ -35,20 +37,54 @@ class SalesPageState extends State<SalesPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Use Provider to get the CartProvider instance
+    CartProvider cartProvider = Provider.of<CartProvider>(context);
+
     return Scaffold(
       body: _buildBody(context),
       floatingActionButton: MediaQuery.of(context).size.width > 600
           ? null
-          : FloatingActionButton(
-              onPressed: () {
-                _showCartDialog(context);
-              },
-              child: const Icon(Icons.shopping_cart),
+          : Stack(
+              children: [
+                FloatingActionButton(
+                  onPressed: () {
+                    _showCartDialog(context);
+                  },
+                  child: const Icon(Icons.shopping_cart),
+                ),
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 16,
+                      minHeight: 16,
+                    ),
+                    child: Text(
+                      cartProvider.itemCount.toString(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              ],
             ),
     );
   }
 
+
   Widget _buildBody(BuildContext context) {
+    // Use Provider to get the CartProvider instance
+    CartProvider cartProvider = Provider.of<CartProvider>(context);
+
     return Row(
       children: [
         // Left side (Categories and Products)
@@ -117,8 +153,9 @@ class SalesPageState extends State<SalesPage> {
                               return GestureDetector(
                                 onTap: () {
                                   setState(() {
-                                    _selectedCategoryId =
-                                        index == 0 ? 0 : categories[index - 1].id;
+                                    _selectedCategoryId = index == 0
+                                        ? 0
+                                        : categories[index - 1].id;
                                     _loadData();
                                   });
                                 },
@@ -169,6 +206,7 @@ class SalesPageState extends State<SalesPage> {
                               child: CircularProgressIndicator(),
                             );
                           } else if (snapshot.hasError) {
+                            print(snapshot.error.toString());
                             return Center(
                               child: Text('Error: ${snapshot.error}'),
                             );
@@ -180,7 +218,7 @@ class SalesPageState extends State<SalesPage> {
                           } else {
                             _filteredProducts = snapshot.data!;
                             return _buildResponsiveGrid(
-                                _filteredProducts, context);
+                                _filteredProducts, context, cartProvider);
                           }
                         },
                       ),
@@ -204,7 +242,8 @@ class SalesPageState extends State<SalesPage> {
   }
 
   List<PopupMenuItem<int>> _buildCategoryMenuItems() {
-    final List<Category> categories = []; // Replace with your actual category data
+    final List<Category> categories =
+        []; // Replace with your actual category data
     return categories
         .map((category) => PopupMenuItem<int>(
               value: category.id,
@@ -213,7 +252,8 @@ class SalesPageState extends State<SalesPage> {
         .toList();
   }
 
-  Widget _buildResponsiveGrid(List<Product> products, BuildContext context) {
+  Widget _buildResponsiveGrid(
+      List<Product> products, BuildContext context, CartProvider cartProvider) {
     final double screenWidth = MediaQuery.of(context).size.width;
 
     int crossAxisCount = 2;
@@ -224,16 +264,19 @@ class SalesPageState extends State<SalesPage> {
       crossAxisCount = 4;
     }
 
- List<Product> filteredProducts = _selectedCategoryId == 0
-    ? _filteredProducts
-        .where((product) =>
-            product.title.toLowerCase().contains(_searchQuery.toLowerCase()))
-        .toList()
-    : _filteredProducts
-        .where((product) =>
-            product.categoryId == _selectedCategoryId &&
-            product.title.toLowerCase().contains(_searchQuery.toLowerCase()))
-        .toList();
+    List<Product> filteredProducts = _selectedCategoryId == 0
+        ? _filteredProducts
+            .where((product) => product.title
+                .toLowerCase()
+                .contains(_searchQuery.toLowerCase()))
+            .toList()
+        : _filteredProducts
+            .where((product) =>
+                product.categoryId == _selectedCategoryId &&
+                product.title
+                    .toLowerCase()
+                    .contains(_searchQuery.toLowerCase()))
+            .toList();
 
     return GridView.builder(
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -244,12 +287,12 @@ class SalesPageState extends State<SalesPage> {
       ),
       itemCount: filteredProducts.length,
       itemBuilder: (context, index) {
-        return buildProductCard(filteredProducts[index]);
+        return buildProductCard(filteredProducts[index], cartProvider);
       },
     );
   }
 
-  Widget buildProductCard(Product product) {
+  Widget buildProductCard(Product product, CartProvider cartProvider) {
     bool isOutOfStock = product.availability.toLowerCase() == 'out of stock';
 
     return Card(
@@ -292,7 +335,7 @@ class SalesPageState extends State<SalesPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    ' BND ${product.variants.first.sellingPrice}',
+                  'BND ${product.variants.first.sellingPrice}',
                     style: const TextStyle(color: Colors.white),
                   ),
                 ],
@@ -324,6 +367,17 @@ class SalesPageState extends State<SalesPage> {
                   Text(
                     'Available Stock: ${product.availableStock}',
                     style: const TextStyle(color: Colors.white),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      // Add the product to the cart when the button is pressed
+                      cartProvider.addToCart(
+                        productId: product.id.toString(),
+                        productName: product.title,
+                        price: product.variants.first.sellingPrice as double,
+                      );
+                    },
+                    child: const Text('Add to Cart'),
                   ),
                 ],
               ),

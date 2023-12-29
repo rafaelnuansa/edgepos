@@ -33,8 +33,8 @@ class SalesOverviewCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     title,
-                    overflow: TextOverflow.ellipsis, // Add ellipsis to the text
-                    maxLines: 2, // Limit the number of lines to 2
+                    overflow: TextOverflow.ellipsis, 
+                    maxLines: 2,
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
